@@ -19,8 +19,9 @@ mongoose
   });
 
 const userRouter = require("./routes/user");
+const methodLogger = require("./logger/logger");
 
-
+app.use(methodLogger);
 app.use("/", userRouter);
 
 const port = 3000;
