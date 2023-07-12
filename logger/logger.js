@@ -1,5 +1,5 @@
 const methodLogger = (req, res, next) => {
-  console.log(`Request URL: ${req.url}`);
+  console.log(`Request: ${req.method + " - " + req.url}`);
   next();
 };
 
