@@ -12,6 +12,8 @@ const userSchema = new mongoose.Schema({
     },
     mobileno:{
         type : String,
+        maxlength: 10,
+        minlength: 10
         // required : true
     }
 })

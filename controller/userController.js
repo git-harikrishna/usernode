@@ -38,6 +38,11 @@ exports.getUserById = async (req, res, next) => {
     console.log(req.params);
     const id = req.params.id;
     const user = await User.findById(id);
+
+    if (user == null) {
+      throw " no user found with the id";
+    }
+
     res.json(user);
   } catch (e) {
     res.send("Error: " + e);
@@ -49,6 +54,10 @@ exports.updateUser = async (req, res, next) => {
 
   try {
     const user = await User.findById(req.params.id);
+
+    if (user == null) {
+      throw " no user found with the id";
+    }
 
     console.log(req.body);
 
@@ -72,6 +81,10 @@ exports.deleteUser = async (req, res, next) => {
 
   try {
     const user = await User.findByIdAndRemove(req.params.id);
+
+    if (user == null) {
+      throw " no user found with the id";
+    }
 
     res.send("User Deleted");
   } catch (e) {
