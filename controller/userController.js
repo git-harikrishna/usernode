@@ -10,6 +10,14 @@ exports.addUser = async (req, res, next) => {
   };
 
   try {
+    if (req.body.name == null) {
+      return res.status(400).json({ message: "User name can't be null" });
+    }
+
+    if (req.body.id == null) {
+      return res.status(400).json({ message: "id field can't be null" });
+    }
+
     const newuser = await new User(user);
     newuser.save();
     res.json(newuser);
@@ -40,7 +48,8 @@ exports.getUserById = async (req, res, next) => {
     const user = await User.findById(id);
 
     if (user == null) {
-      throw " no user found with the id";
+      return res.status(400).json({ message: "no user found with that id" });
+      // throw " no user found with the id";
     }
 
     res.json(user);
@@ -56,7 +65,10 @@ exports.updateUser = async (req, res, next) => {
     const user = await User.findById(req.params.id);
 
     if (user == null) {
-      throw " no user found with the id";
+      return res
+        .status(400)
+        .json({ message: "no user found with the given id" });
+      // throw " no user found with the id";
     }
 
     console.log(req.body);
@@ -83,7 +95,10 @@ exports.deleteUser = async (req, res, next) => {
     const user = await User.findByIdAndRemove(req.params.id);
 
     if (user == null) {
-      throw " no user found with the id";
+      return res
+        .status(400)
+        .json({ message: "no user found with the given id" });
+      // throw " no user found with the id";
     }
 
     res.send("User Deleted");
