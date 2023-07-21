@@ -27,8 +27,7 @@ exports.addUser = async (req, res, next) => {
 };
 
 exports.getUser = async (req, res, next) => {
-  console.log("getUser called");
-
+  console.log(req.user);
   try {
     const user = await User.find();
     res.json(user);
@@ -61,8 +60,12 @@ exports.getUserById = async (req, res, next) => {
 exports.updateUser = async (req, res, next) => {
   console.log("updateUser called");
 
+  console.log(req.user);
+  console.log(req.params.id);
+
   try {
     const user = await User.findById(req.params.id);
+    console.log(user);
 
     if (user == null) {
       return res
@@ -79,7 +82,7 @@ exports.updateUser = async (req, res, next) => {
 
     console.log(user.name);
     console.log(user);
-
+    if (!(req.user.id == user.id)) return res.json({ msg: "Unauthorized" });
     const updatedUser = await user.save();
 
     res.json(updatedUser);
@@ -106,3 +109,16 @@ exports.deleteUser = async (req, res, next) => {
     res.send("Error: " + e);
   }
 };
+
+// exports.login = async (req, res, next) => {
+//   try {
+//     const name = req.body.name;
+//     const id = req.body.id;
+//     const mobileno = req.body.mobileno;
+
+//     const user = { name: name, id: id };
+
+//     jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
+//   } catch (e) {}
+
+// };
