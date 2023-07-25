@@ -12,7 +12,7 @@ exports.services = async (user) => {
 async function generateAccesstoken(user) {
   console.log(user);
   return await jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-    expiresIn: "30s",
+    expiresIn: "2m",
   });
 }
 
@@ -32,7 +32,7 @@ exports.login = async (req, res, next) => {
         if (!result) {
           return res.status(401).json({ msg: "Invalid Password" });
         } else {
-          const user = { name: name, password: password };
+          const user = { id : dbuser._id };
           res.status(200).json(await this.services(user));
           console.log(await this.services(user));
         }

@@ -51,8 +51,8 @@ exports.addUser = async (req, res, next) => {
 exports.getUserById = async (req, res, next) => {
   console.log("getUserById called");
   try {
-    const name = req.user.name;
-    const user = await User.findOne({name});
+    const id = req.user.id;
+    const user = await User.findById(id);
 
     if (user == null) {
       return res.status(400).json({ message: "no user found" });
@@ -68,12 +68,11 @@ exports.updateUser = async (req, res, next) => {
   console.log("updateUser called");
 
   console.log(req.user);
-  // console.log(req.params.id);
-
-  // if (!(req.user.id == req.params.id)) return res.json({ msg: "Unauthorized" });
+  
+  const id = req.user.id;
 
   try {
-    const user = await User.findOne({name : req.user.name});
+    const user = await User.findById(id);
     console.log(user);
 
     if (user == null) {
@@ -87,12 +86,9 @@ exports.updateUser = async (req, res, next) => {
 
     user.name = req.body.name;
     user.mobileno = req.body.mobileno;
-    // user.id= 123;
 
     console.log(user.name);
     console.log(user);
-
-    // req.body.name = user.name;
 
     const newuser = { name: req.body.name, password: req.body.password };
     
@@ -107,17 +103,9 @@ exports.updateUser = async (req, res, next) => {
 exports.deleteUser = async (req, res, next) => {
   console.log("deleteUser called");
 
-  // if (!(req.user.id == req.params.id)) return res.json({ msg: "Unauthorized" });
-
-
   try {
 
-
-    const dbuser = await User.findOne({name : req.user.name});
-
-    const id = dbuser.id;
-
-    const user = await User.findByIdAndRemove(id);
+    const user = await User.findByIdAndRemove(req.user.id);
 
     if (user == null) {
       return res
