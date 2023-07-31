@@ -9,7 +9,7 @@ const authenticateRouter = require("./routes/authenticationRoute");
 
 app.use(express.json());
 app.use(methodLogger);
-app.use("/login", authenticateRouter); // Use authenticateRouter for login route
+app.use("/auth", authenticateRouter); // Use authenticateRouter for login route
 app.use("/user", userRouter);
 
 const port = 3000;
