@@ -2,14 +2,13 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/userschema");
 const bcrypt = require("bcrypt");
 
-exports.services = async (user) => {
+async function services(user) {
   console.log(user);
-  const accessToken = await generateAccesstoken(user);
-  const refreshToken = await jwt.sign(user, process.env.REFRESH_ACCESS_TOKEN);
-  return { accessToken: accessToken, refreshToken: refreshToken };
-};
+  const accessToken = await generateAccessToken(user);
+  return { accessToken: accessToken };
+}
 
-async function generateAccesstoken(user) {
+async function generateAccessToken(user) {
   console.log(user);
   return await jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
     expiresIn: "2m",
@@ -32,9 +31,9 @@ exports.login = async (req, res, next) => {
         if (!result) {
           return res.status(401).json({ msg: "Invalid Password" });
         } else {
-          const user = { id : dbuser._id };
-          res.status(200).json(await this.services(user));
-          console.log(await this.services(user));
+          const user = { id: dbuser._id };
+          res.status(200).json(await services(user));
+          console.log(await services(user));
         }
       }
     });
@@ -45,18 +44,22 @@ exports.login = async (req, res, next) => {
 };
 
 exports.refreshToken = async (req, res, next) => {
-  const refreshToken = req.body.token;
+  const refreshToken = req.headers.token;
+  console.log(req);
+  if (refreshToken==null || refreshToken === "") {
+    const newRefreshToken = await jwt.sign({ id: req.user.id }, process.env.REFRESH_ACCESS_TOKEN, {
+      expiresIn: "60m",
+    });
+    return res.status(200).json({RefreshToken:newRefreshToken});
+  }
 
-  if (refreshToken == null) return res.sendStatus(401);
-
-  jwt.verify(refreshToken, process.env.REFRESH_ACCESS_TOKEN,async (err, user) => {
+  jwt.verify(refreshToken, process.env.REFRESH_ACCESS_TOKEN, async (err, user) => {
     if (err) res.send(err);
 
     console.log(user);
 
-    const accessToken = await generateAccesstoken({
-      name: user.name,
-      password: user.password,
+    const accessToken = await generateAccessToken({
+      id: req.user.id,
     });
 
     res.status(200).json({ accessToken: accessToken });

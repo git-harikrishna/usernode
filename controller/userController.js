@@ -36,18 +36,6 @@ exports.addUser = async (req, res, next) => {
   }
 };
 
-// exports.getUser = async (req, res, next) => {
-//   console.log(req.user);
-//   try {
-//     const user = await User.find();
-//     res.json(user);
-//   } catch (e) {
-//     res.send("Error : " + e);
-//   }
-
-  // res.send("get User is a function which returns the User Details");
-// };
-
 exports.getUserById = async (req, res, next) => {
   console.log("getUserById called");
   try {
@@ -89,14 +77,12 @@ exports.updateUser = async (req, res, next) => {
 
     console.log(user.name);
     console.log(user);
-
-    const newuser = { name: req.body.name, password: req.body.password };
     
     user.save();
 
-    res.json(user);
+    res.status(200).json(user);
   } catch (e) {
-    res.send("Error: " + e);
+    res.status(401).send("Error: " + e);
   }
 };
 
@@ -114,21 +100,9 @@ exports.deleteUser = async (req, res, next) => {
       // throw " no user found with the id";
     }
 
-    res.send("User Deleted");
+    res.status(200).send("User Deleted");
   } catch (e) {
-    res.send("Error: " + e);
+    res.status(401).send("Error: " + e);
   }
 };
 
-// exports.login = async (req, res, next) => {
-//   try {
-//     const name = req.body.name;
-//     const id = req.body.id;
-//     const mobileno = req.body.mobileno;
-
-//     const user = { name: name, id: id };
-
-//     jwt.sign(user, process.env.ACCESS_TOKEN_SECRET);
-//   } catch (e) {}
-
-// };
