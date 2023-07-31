@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 async function services(user) {
   console.log(user);
   const accessToken = await generateAccessToken(user);
-  return { acctoken: accessToken };
+  return { accessToken };
 }
 
 async function generateAccessToken(user) {
@@ -50,7 +50,7 @@ exports.refreshToken = async (req, res, next) => {
     const newRefreshToken = await jwt.sign({ id: req.user.id }, process.env.REFRESH_ACCESS_TOKEN, {
       expiresIn: "60m",
     });
-    return res.status(200).json({RefToken:newRefreshToken});
+    return res.status(200).json({ refreshToken :newRefreshToken});
   }
 
   jwt.verify(refreshToken, process.env.REFRESH_ACCESS_TOKEN, async (err, user) => {
@@ -62,6 +62,6 @@ exports.refreshToken = async (req, res, next) => {
       id: req.user.id,
     });
 
-    res.status(200).json({ accToken: accessToken });
+    res.status(200).json({  accessToken });
   });
 };
