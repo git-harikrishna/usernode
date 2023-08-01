@@ -2,17 +2,13 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/userschema");
 const bcrypt = require("bcrypt");
 
-async function services(user) {
-  console.log(user);
-  const accessToken = await generateAccessToken(user);
-  return { accessToken };
-}
-
 async function generateAccessToken(user) {
   console.log(user);
-  return await jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+  const accessToken = await jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
     expiresIn: "2m",
   });
+
+  return {accessToken};
 }
 
 exports.login = async (req, res, next) => {
@@ -32,8 +28,7 @@ exports.login = async (req, res, next) => {
           return res.status(401).json({ msg: "Invalid Password" });
         } else {
           const user = { id: dbuser._id };
-          res.status(200).json(await services(user));
-          console.log(await services(user));
+          res.status(200).json(await generateAccessToken(user));
         }
       }
     });
@@ -45,23 +40,27 @@ exports.login = async (req, res, next) => {
 
 exports.refreshToken = async (req, res, next) => {
   const refreshToken = req.headers.token;
-  console.log(req);
-  if (refreshToken==null || refreshToken === ""|| refreshToken == undefined ) {
-    const newRefreshToken = await jwt.sign({ id: req.user.id }, process.env.REFRESH_ACCESS_TOKEN, {
-      expiresIn: "60m",
+
+  try {
+    if (refreshToken==null || refreshToken === ""|| refreshToken == undefined ) {
+      const newRefreshToken = await jwt.sign({ id: req.user.id }, process.env.REFRESH_ACCESS_TOKEN, {
+        expiresIn: "60m",
+      });
+      return res.status(200).json({ refreshToken :newRefreshToken});
+    }
+  
+    jwt.verify(refreshToken, process.env.REFRESH_ACCESS_TOKEN, async (err, user) => {
+  
+      console.log(user);
+  
+      const accessToken = await generateAccessToken({
+        id: req.user.id,
+      });
+      res.status(200).json({  accessToken });
     });
-    return res.status(200).json({ refreshToken :newRefreshToken});
   }
-
-  jwt.verify(refreshToken, process.env.REFRESH_ACCESS_TOKEN, async (err, user) => {
-    if (err) res.send(err);
-
-    console.log(user);
-
-    const accessToken = await generateAccessToken({
-      id: req.user.id,
-    });
-
-    res.status(200).json({  accessToken });
-  });
-};
+  catch (err){
+    console.log(err)
+  }
+  
+  };
