@@ -8,7 +8,15 @@ async function generateAccessToken(user) {
     expiresIn: "2m",
   });
 
-  return {accessToken};
+  return accessToken;
+}
+
+async function generateRefreshToken(user){
+
+  const refreshToken = await jwt.sign(user, process.env.REFRESH_ACCESS_TOKEN,{
+    expiresIn: "30m",
+  })
+  return  refreshToken ;
 }
 
 exports.login = async (req, res, next) => {
@@ -17,7 +25,7 @@ exports.login = async (req, res, next) => {
     const loginname = req.body.name;
     const loginpassword = req.body.password;
 
-    const dbuser = await User.findOne({ name : loginname}); // Use findOne() to get a single document
+    const dbuser = await User.findOne({ name: loginname }); // Use findOne() to get a single document
     if (!dbuser) return res.status(400).json({ msg: "No such username found" });
 
     bcrypt.compare(loginpassword, dbuser.password, async (err, result) => {
@@ -28,7 +36,11 @@ exports.login = async (req, res, next) => {
           return res.status(401).json({ msg: "Invalid Password" });
         } else {
           const user = { id: dbuser._id };
-          res.status(200).json(await generateAccessToken(user));
+
+          const accessToken = await generateAccessToken(user);
+          const refreshToken= await generateRefreshToken(user);
+
+          res.status(200).json( { accessToken , refreshToken } );
         }
       }
     });
@@ -42,25 +54,28 @@ exports.refreshToken = async (req, res, next) => {
   const refreshToken = req.headers.token;
 
   try {
-    if (refreshToken==null || refreshToken === ""|| refreshToken == undefined ) {
-      const newRefreshToken = await jwt.sign({ id: req.user.id }, process.env.REFRESH_ACCESS_TOKEN, {
-        expiresIn: "60m",
-      });
-      return res.status(200).json({ refreshToken :newRefreshToken});
+    if (
+      refreshToken == null ||
+      refreshToken === "" ||
+      refreshToken == undefined
+    ) 
+    {
+      res.status(401).json({msg : "refreshToken undefined"});
     }
-  
-    jwt.verify(refreshToken, process.env.REFRESH_ACCESS_TOKEN, async (err, user) => {
-  
-      console.log(user);
-  
-      const accessToken = await generateAccessToken({
-        id: req.user.id,
-      });
-      res.status(200).json({  accessToken });
-    });
+
+    jwt.verify(
+      refreshToken,
+      process.env.REFRESH_ACCESS_TOKEN,
+      async (err, user) => {
+        console.log(user);
+
+        const accessToken = await generateAccessToken({
+          id: user.id,
+        });
+        res.status(200).json({ accessToken });
+      }
+    );
+  } catch (err) {
+    console.log(err);
   }
-  catch (err){
-    console.log(err)
-  }
-  
-  };
+};

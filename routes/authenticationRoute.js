@@ -5,6 +5,6 @@ const { authenticateToken } = require("../middleware/authenticate");
 
 const authenticateRouter = express.Router();
 authenticateRouter.post("/login", authFunctions.login);
-authenticateRouter.get("/refreshToken",authenticateToken,authFunctions.refreshToken);
+authenticateRouter.get("/refreshToken",authFunctions.refreshToken);
 
 module.exports = authenticateRouter;
