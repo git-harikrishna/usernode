@@ -82,7 +82,7 @@ exports.updateUser = async (req, res, next) => {
 
     res.status(200).json(user);
   } catch (e) {
-    res.status(401).send("Error: " + e);
+    res.status(404).send("Error: " + e);
   }
 };
 
@@ -102,7 +102,7 @@ exports.deleteUser = async (req, res, next) => {
 
     res.status(200).send("User Deleted");
   } catch (e) {
-    res.status(401).send("Error: " + e);
+    res.status(404).send("Error: " + e);
   }
 };
 
