@@ -1,12 +1,21 @@
 const User = require("../models/userschema");
 
+const authenticationController = require("./authenticationController");
+
+const bcrypt = require("bcrypt");
+const { login } = require("./authenticationController");
+
 exports.addUser = async (req, res, next) => {
   console.log("addUser called");
 
+  const temp = req.body.password;
+  const saltPassword = await bcrypt.genSalt(10);
+  const securePassword = await bcrypt.hash(temp, saltPassword);
+
   const user = {
     name: req.body.name,
-    id: req.body.id,
     mobileno: req.body.mobileno,
+    password: securePassword
   };
 
   try {
@@ -14,60 +23,50 @@ exports.addUser = async (req, res, next) => {
       return res.status(400).json({ message: "User name can't be null" });
     }
 
-    if (req.body.id == null) {
-      return res.status(400).json({ message: "id field can't be null" });
+    const dbuser = await User.findOne({ name: req.body.name });
+    if (dbuser != null) {
+      return res.status(400).json({ message: "User name already exists. Please choose a different user name." });
     }
 
     const newuser = await new User(user);
-    newuser.save();
-    res.json(newuser);
+    await newuser.save();
+    res.status(200).json(newuser);
   } catch (e) {
-    res.send("error : " + e);
+    res.status(500).json({ error: "An error occurred while processing the request." });
   }
-};
-
-exports.getUser = async (req, res, next) => {
-  console.log("getUser called");
-
-  try {
-    const user = await User.find();
-    res.json(user);
-  } catch (e) {
-    res.send("Error : " + e);
-  }
-
-  // res.send("get User is a function which returns the User Details");
 };
 
 exports.getUserById = async (req, res, next) => {
   console.log("getUserById called");
-
   try {
-    console.log(req.params);
-    const id = req.params.id;
+    const id = req.user.id;
     const user = await User.findById(id);
 
     if (user == null) {
-      return res.status(400).json({ message: "no user found with that id" });
-      // throw " no user found with the id";
+      return res.status(400).json({ message: "no user found" });
     }
-
     res.json(user);
   } catch (e) {
-    res.send("Error: " + e);
+    res.status(500).json({ error: "An error occurred while processing the request." });
   }
 };
+
 
 exports.updateUser = async (req, res, next) => {
   console.log("updateUser called");
 
+  console.log(req.user);
+  
+  const id = req.user.id;
+
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(id);
+    console.log(user);
 
     if (user == null) {
       return res
         .status(400)
-        .json({ message: "no user found with the given id" });
+        .json({ message: "no user found" });
       // throw " no user found with the id";
     }
 
@@ -75,16 +74,15 @@ exports.updateUser = async (req, res, next) => {
 
     user.name = req.body.name;
     user.mobileno = req.body.mobileno;
-    // user.id= 123;
 
     console.log(user.name);
     console.log(user);
+    
+    user.save();
 
-    const updatedUser = await user.save();
-
-    res.json(updatedUser);
+    res.status(200).json(user);
   } catch (e) {
-    res.send("Error: " + e);
+    res.status(500).send("Error: " + e);
   }
 };
 
@@ -92,7 +90,8 @@ exports.deleteUser = async (req, res, next) => {
   console.log("deleteUser called");
 
   try {
-    const user = await User.findByIdAndRemove(req.params.id);
+
+    const user = await User.findByIdAndRemove(req.user.id);
 
     if (user == null) {
       return res
@@ -101,8 +100,9 @@ exports.deleteUser = async (req, res, next) => {
       // throw " no user found with the id";
     }
 
-    res.send("User Deleted");
+    res.status(200).send("User Deleted");
   } catch (e) {
-    res.send("Error: " + e);
+    res.status(500).send("Error: " + e);
   }
 };
+
