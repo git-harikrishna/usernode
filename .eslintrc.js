@@ -5,12 +5,14 @@ module.exports = {
     },
     "extends": [
         "eslint:recommended",
-        "plugin:react/recommended"
+        // "plugin:react/recommended"
     ],
     "overrides": [
         {
             "env": {
-                "node": true
+                "browser ": true,
+                "node": true,
+                "es2021": true,
             },
             "files": [
                 ".eslintrc.{js,cjs}"
